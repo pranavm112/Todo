@@ -7,7 +7,7 @@ import TodoItem from './components/TodoItem'
 import ThemeBtn from './components/ThemeBtn'
 import { ThemeProvider } from './contexts/theme'
 
-const BASE_URL = process.env.REACT_APP_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 
 function App() {
