@@ -145,14 +145,27 @@ function App() {
   }, [todos])*/
 
   // Filtering and searching todos
-  const filteredTodos = todos.filter((todo) => {
+  /*const filteredTodos = todos.filter((todo) => {
     if (filter === "active") return !todo.completed
     if (filter === "completed") return todo.completed
     return true
   }).filter(todo => 
     todo.title.toLowerCase().includes(search.toLowerCase())  
   )
-  
+  */
+  // Filtering and searching todos   //******************************************************************************* */
+const filteredTodos = Array.isArray(todos)
+  ? todos
+      .filter(todo => {
+        if (filter === "active") return !todo.completed;
+        if (filter === "completed") return todo.completed;
+        return true;
+      })
+      .filter(todo =>
+        todo.title.toLowerCase().includes(search.toLowerCase())
+      )
+  : [];
+
 
   // actual change in theme
 
