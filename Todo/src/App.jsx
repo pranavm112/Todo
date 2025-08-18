@@ -1,13 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import { TodoProvider } from './contexts'
 import TodoForm from './components/TodoForm'
 import TodoItem from './components/TodoItem'
 import ThemeBtn from './components/ThemeBtn'
 import { ThemeProvider } from './contexts/theme'
-
-const BASE_URL = import.meta.env.VITE_API_URL;
+import api from './api.js'
 
 
 function App() {
@@ -28,21 +26,7 @@ function App() {
 
   const darkTheme = () => {setThemeMode("dark")}
 
-  // Handlers for adding, updating, deleting, and toggling todos
-  // id: Date.now(), todo, completed: false}, ...prev
- 
-  /*const addTodo = (todo) => {
-    setTodos((prev) => [{id: Date.now(), ...todo}, ...prev])   
-  }*/
-  //From local Storage Add Todo is connected to backend
-  /*const addTodo = async (todo) => {
-    try {
-      const res = await axios.post(`${BASE_URL}`, todo);
-      setTodos(prev => [res.data, ...prev]);
-    } catch (err) {
-      console.log('Add todo erroes', err)
-    }
-  };*/
+
 
   const addTodo = async (todo) => {
   if (!todo.title.trim()) {
@@ -51,7 +35,7 @@ function App() {
   }
   try {
     //setError(null);
-    const res = await axios.post(BASE_URL, todo);
+    const res = await api.post("/todos", todo);
     setTodos(prev => [res.data, ...prev]);
     setError(null); // Clear error on success
   } catch (err) {
@@ -59,11 +43,6 @@ function App() {
   }
 };
 
-
-
-  /*const updateTodo = (id, todo) => {
-    setTodos((prev) => prev.map((prevTodo) => (prevTodo.id === id ? todo : prevTodo)))
-  }*/
   
   // Update todo function
   const updateTodo = async (id, todo) => {
@@ -73,8 +52,9 @@ function App() {
     }
 
     try {
-      const res = await axios.put(`${BASE_URL}/${id}`, todo);
+      const res = await api.put(`/todos/${id}`, todo);
       setTodos(prev => prev.map(todo => todo._id === id ? res.data : todo))
+      setError(null)
     }
     catch (err) {
       setError('Failed to update todo')
@@ -82,36 +62,25 @@ function App() {
   }
 
 
-  
 
-  /*const deleteTodo = (id) => {
-    setTodos((prev) => prev.filter((todo) => todo.id !== id))
-  }*/
   
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/${id}`);
+      await api.delete(`/todos/${id}`);
       setTodos(prev => prev.filter(todo => todo._id !== id));
       setError(null);
   } catch (err) {
-      setError('Delete Todo error');
+      setError('Failed to delete todo');
     }
   };
 
   
-/*
-  const toggleComplete = (id) => {
-    setTodos((prev) =>
-      prev.map((prevTodo) =>
-        prevTodo.id === id
-          ? { ...prevTodo, completed: !prevTodo.completed } : prevTodo))
-  }
-*/
+
   // Toggle complete function
   const toggleComplete = async (id) => {
     try {
       const todoToToggle = todos.find(todo => todo._id === id)
-      const res = await axios.put(`${BASE_URL}/${id}`, {
+      const res = await api.put(`/todos/${id}`, {
         ...todoToToggle,
         completed: !todoToToggle.completed,
       });
@@ -122,37 +91,7 @@ function App() {
     }
   }
 
-  /*useEffect(() => {
-    const todos = JSON.parse(localStorage.getItem('todos'))
-    
-    if (todos && todos.length > 0) {
-      setTodos(todos)
-    }
-  }, [])*/
 
-  // Persist todos in localStorage
-
-  //Using localStorage to persist todos is commented out as the app is now connected to a backend API.
-  /*
-  useEffect(() => {
-    const local = JSON.parse(localStorage.getItem('todos'));
-    if (local && local.length > 0) setTodos(local);
-  }, []);
-
-
-  useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos))
-  }, [todos])*/
-
-  // Filtering and searching todos
-  /*const filteredTodos = todos.filter((todo) => {
-    if (filter === "active") return !todo.completed
-    if (filter === "completed") return todo.completed
-    return true
-  }).filter(todo => 
-    todo.title.toLowerCase().includes(search.toLowerCase())  
-  )
-  */
   // Filtering and searching todos   //******************************************************************************* */
 const filteredTodos = Array.isArray(todos)
   ? todos
@@ -176,27 +115,22 @@ const filteredTodos = Array.isArray(todos)
   }, [themeMode])
 
 
-  // Axios setup for API requests
   useEffect(() => {
-  setLoading(true);
-  axios.get(BASE_URL)
-    .then(res => setTodos(res.data))
-    .catch(err => setError('Failed to fetch todos'))
-    .finally(() => setLoading(false)); // Always stop loading
+  const fetchTodos = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/todos");
+      setTodos(res.data);
+    } catch (err) {
+      setError("Failed to fetch todos");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchTodos();
   }, []);
-
   
-  /*
-  useEffect(() => {
-
-    //Fetch Todo
-    axios.get(BASE_URL)
-      .then(res => setTodos(res.data))
-      .catch(err => console.log("Fetch Todo Error", err))
-  }, []); */
-
-  
-  
+    
   return (
   <ThemeProvider value={{ themeMode, darkTheme, lightTheme }}>
     <TodoProvider value={{ todos, addTodo, updateTodo, deleteTodo, toggleComplete }}>

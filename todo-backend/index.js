@@ -13,9 +13,17 @@ const app = express()
 
 
 app.use(express.json());
-app.use(cors({
-  origin: "*"
-}));
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://todo-frontend.onrender.com" // add your deployed frontend URL
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 app.use('/api/todos',todoRoutes);
 
@@ -23,7 +31,7 @@ app.get('/', (req, res) => {
     res.json({ ok: true, message: "Backend is running fine 🚀" });
 });
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })
