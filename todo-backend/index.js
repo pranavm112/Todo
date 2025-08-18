@@ -19,7 +19,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://todo-frontend.onrender.com" // add your deployed frontend URL
+      "https://todo-pqq2.vercel.app" 
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
